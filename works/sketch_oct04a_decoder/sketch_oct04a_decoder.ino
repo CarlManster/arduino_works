@@ -59,49 +59,49 @@ void setup() {
 }
 
 void loop() {
-  int volume = analogRead(A0);
+  int volume = analogRead(A0); 	// 아날로그 A0에서 읽기
 
   int count = 0;
-  if (volume >= threshold) { 
-    pressAccumulated++;
-    restAccumulated = 0;
-  } else {
-    restAccumulated++;
-    count = pressAccumulated;
-    pressAccumulated = 0;
+  if (volume >= threshold) {  	// 상태값이 임계값 이상이면 누른것으로 간주
+    pressAccumulated++;			    // 누른 시간 증가
+    restAccumulated = 0;		    // 휴지 시간 초기화
+  } else {						          // 상태값이 임계값 미만이면 누르지 않는 것으로 간주
+    restAccumulated++;			    // 휴지 시간 증가
+    count = pressAccumulated;	  // 누른 시간을 정산
+    pressAccumulated = 0;		    // 누른 시간 초기화
     
-    if (restAccumulated > restCount) {
+    if (restAccumulated > restCount) { // 휴지 시간이 일정 시간 지속되면 종료 처리 후 판독
       findLetter();
-      restAccumulated = 0;
-      morseCode = "";
+      restAccumulated = 0;		  // 휴지 시간 초기화
+      morseCode = "";			      // 누적된 모르스 코드 문자열 초기화
     }
   }
 
-  if (count > longCount) {
+  if (count > longCount) {			// 정산된 누른 시간이 길게 누른 것으로 판단될 경우
     morseCode += "-";
     Serial.print("-");
-  } else if (count > shortCount) {
+  } else if (count > shortCount) {	// 정산된 누른 시간이 짧게 누른 것으로 판단될 경우
     morseCode += ".";
     Serial.print(".");
   }
 
-  delay(waitMilli);
+  delay(waitMilli);					// Loop 간 간격
 }
 
 void findLetter() {
   char morseCodeArray[maxPattern];
-  morseCode.toCharArray(morseCodeArray, maxPattern);
+  morseCode.toCharArray(morseCodeArray, maxPattern); // String을 char array로 변환
   
-  if (strlen(morseCodeArray) > 0) {
+  if (strlen(morseCodeArray) > 0) { // 문자열의 길이가 0보다 크면 패턴을 찾음
     Serial.print(" : ");
     
     for (int i=0;i<PATTERN_COUNT;i++) {
       if (strlen(morseCodeArray) == strlen(codes[i]) && strcmp(morseCodeArray,codes[i]) == 0) {
-        Serial.println(letters[i]);
+        Serial.println(letters[i]);	// 발견된 패턴이 있으면 해당 문자열 출력
         return;
       }
     }
 
-    Serial.println('?');
+    Serial.println('?');			// 발견된 패턴이 없으면 ? 문자열 출력
   }
 }
